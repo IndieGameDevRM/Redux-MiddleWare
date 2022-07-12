@@ -1,20 +1,42 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { applyMiddleware, legacy_createStore as createStore } from 'redux';
+import { Provider } from 'react-redux';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+import CounterApp from './src/component/CounterApp';
+import  { counterReducer } from './src/redux/reducers/reducer';
+import React, { Component } from 'react'
+
+// const myLogger = (store)=>{
+//   return (next) => {
+//     return (action) => {
+//       console.log("middleWare Run")
+//       return next(action  )
+//     }
+//   }
+// }
+
+const myLogger = store => next => action => {
+     
+      return next(action  )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const decrementAtTen = store => next => action => {
+  if(store.getState().counter >= 10){
+    return next({type:"DECREMENT"})
+  }
+  return next(action)
+}
+
+const store = createStore(counterReducer,applyMiddleware(myLogger,decrementAtTen))
+
+export class App extends Component {
+  render() {
+    return (
+      <Provider store = {store}>
+        <CounterApp/>
+      </Provider>
+    )
+  }
+}
+
+export default App
+
